@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电子歌单 - 横向布局</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #4cc9f0;
+            text-shadow: 0 0 10px rgba(76, 201, 240, 0.5);
+        }
+        
+        .tagline {
+            color: #a3a3c2;
+            font-size: 1.2rem;
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .search-box button {
+            padding: 15px 25px;
+            border: none;
+            background: #4cc9f0;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: #3aa8d0;
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: #4cc9f0;
+            color: white;
+        }
+        
+        .horizontal-playlist {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 10px;
+            margin-bottom: 40px;
+            scrollbar-width: thin;
+            scrollbar-color: #4cc9f0 #1a1a2e;
+        }
+        
+        .horizontal-playlist::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .horizontal-playlist::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 10px;
+        }
+        
+        .horizontal-playlist::-webkit-scrollbar-thumb {
+            background: #4cc9f0;
+            border-radius: 10px;
+        }
+        
+        .song-card {
+            flex: 0 0 auto;
+            width: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .song-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .song-image {
+            height: 150px;
+            background: linear-gradient(45deg, #4cc9f0, #7b68ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+        
+        .song-info {
+            padding: 20px;
+        }
+        
+        .song-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .song-artist {
+            color: #4cc9f0;
+            margin-bottom: 10px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .song-artist i {
+            margin-right: 8px;
+        }
+        
+        .song-album {
+            color: #a3a3c2;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .song-album i {
+            margin-right: 8px;
+        }
+        
+        .song-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .song-tag {
+            padding: 5px 10px;
+            background: rgba(76, 201, 240, 0.2);
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #4cc9f0;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4cc9f0;
+            color: #fff;
+        }
+        
+        .artist-highlight {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+        
+        .artist-highlight:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(5px);
+        }
+        
+        .artist-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4cc9f0, #7b68ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .artist-info {
+            flex-grow: 1;
+        }
+        
+        .artist-name {
+            font-size: 1.2rem;
+            color: #4cc9f0;
+            margin-bottom: 5px;
+        }
+        
+        .artist-genre {
+            color: #a3a3c2;
+            font-size: 0.9rem;
+        }
+        
+        .artist-songs {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .song-card {
+                width: 220px;
+            }
+            
+            .horizontal-playlist {
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .song-card {
+                width: 200px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>电子歌单</h1>
+            <p class="tagline">探索音乐世界，发现心动旋律</p>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索歌曲、歌手或专辑...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <button class="filter-btn active">全部</button>
+            <button class="filter-btn">流行</button>
+            <button class="filter-btn">摇滚</button>
+            <button class="filter-btn">电子</button>
+            <button class="filter-btn">爵士</button>
+            <button class="filter-btn">古典</button>
+        </div>
+        
+        <h2 class="section-title">热门歌曲</h2>
+        <div class="horizontal-playlist" id="hot-songs">
+            <!-- 热门歌曲将通过JavaScript动态添加 -->
+        </div>
+        
+        <h2 class="section-title">最新发布</h2>
+        <div class="horizontal-playlist" id="new-songs">
+            <!-- 最新歌曲将通过JavaScript动态添加 -->
+        </div>
+        
+        <h2 class="section-title">歌手推荐</h2>
+        <div id="artists">
+            <!-- 歌手信息将通过JavaScript动态添加 -->
+        </div>
+    </div>
+
+    <script>
+        // 示例歌曲数据
+        const songs = [
+            { id: 1, title: "夏日微风", artist: "电子脉冲", album: "夏日合集", duration: "3:45", genre: "电子", tags: ["电子", "流行", "夏日"], hot: true },
+            { id: 2, title: "星空之下", artist: "宇宙乐队", album: "星空", duration: "4:20", genre: "流行", tags: ["流行", "放松"], hot: true },
+            { id: 3, title: "城市霓虹", artist: "都市之声", album: "夜生活", duration: "3:15", genre: "电子", tags: ["电子", "舞曲"], hot: false },
+            { id: 4, title: "山间小路", artist: "自然之音", album: "乡村之旅", duration: "5:12", genre: "爵士", tags: ["爵士", "放松"], hot: true },
+            { id: 5, title: "月光奏鸣曲", artist: "贝多芬", album: "古典精选", duration: "6:30", genre: "古典", tags: ["古典", "钢琴"], hot: false },
+            { id: 6, title: "摇滚不死", artist: "硬石乐队", album: "摇滚传奇", duration: "4:05", genre: "摇滚", tags: ["摇滚", "激情"], hot: true },
+            { id: 7, title: "深海旋律", artist: "海洋之声", album: "深海", duration: "3:50", genre: "电子", tags: ["电子", "环境"], hot: false },
+            { id: 8, title: "日出时分", artist: "晨光组合", album: "清晨", duration: "4:15", genre: "流行", tags: ["流行", "早晨"], hot: true },
+            { id: 9, title: "雨滴前奏", artist: "天气预测", album: "雨季", duration: "3:22", genre: "爵士", tags: ["爵士", "钢琴"], hot: false },
+            { id: 10, title: "风暴来袭", artist: "雷霆乐队", album: "极端天气", duration: "5:05", genre: "摇滚", tags: ["摇滚", "激烈"], hot: true },
+            { id: 11, title: "云端漫步", artist: "高空项目", album: "天空", duration: "4:40", genre: "电子", tags: ["电子", "氛围"], hot: false },
+            { id: 12, title: "月光小夜曲", artist: "莫扎特", album: "古典珍藏", duration: "7:15", genre: "古典", tags: ["古典", "小提琴"], hot: true }
+        ];
+
+        // 示例歌手数据
+        const artists = [
+            { id: 1, name: "电子脉冲", genre: "电子音乐", songs: 24, avatar: "EP" },
+            { id: 2, name: "宇宙乐队", genre: "流行摇滚", songs: 18, avatar: "CB" },
+            { id: 3, name: "自然之音", genre: "爵士", songs: 15, avatar: "NS" },
+            { id: 4, name: "硬石乐队", genre: "硬摇滚", songs: 32, avatar: "HR" },
+            { id: 5, name: "晨光组合", genre: "流行", songs: 21, avatar: "MG" }
+        ];
+
+        // 渲染歌曲列表
+        function renderSongs(songsArray, elementId) {
+            const songList = document.getElementById(elementId);
+            songList.innerHTML = '';
+            
+            songsArray.forEach(song => {
+                const songCard = document.createElement('div');
+                songCard.className = 'song-card';
+                songCard.innerHTML = `
+                    <div class="song-image">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="song-info">
+                        <h3 class="song-title">${song.title}</h3>
+                        <p class="song-artist"><i class="fas fa-user"></i> ${song.artist}</p>
+                        <p class="song-album"><i class="fas fa-compact-disc"></i> ${song.album}</p>
+                        <div class="song-tags">
+                            ${song.tags.map(tag => `<span class="song-tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+                songList.appendChild(songCard);
+            });
+        }
+        
+        // 渲染歌手列表
+        function renderArtists() {
+            const artistsContainer = document.getElementById('artists');
+            artistsContainer.innerHTML = '';
+            
+            artists.forEach(artist => {
+                const artistElement = document.createElement('div');
+                artistElement.className = 'artist-highlight';
+                artistElement.innerHTML = `
+                    <div class="artist-avatar">${artist.avatar}</div>
+                    <div class="artist-info">
+                        <h3 class="artist-name">${artist.name}</h3>
+                        <p class="artist-genre">${artist.genre}</p>
+                    </div>
+                    <div class="artist-songs">${artist.songs} 首歌曲</div>
+                `;
+                artistsContainer.appendChild(artistElement);
+            });
+        }
+        
+        // 搜索功能
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            const performSearch = () => {
+                const searchText = searchInput.value.toLowerCase();
+                if (searchText.trim() === '') {
+                    // 重置显示
+                    renderSongs(songs.filter(song => song.hot), 'hot-songs');
+                    renderSongs(songs.filter(song => !song.hot), 'new-songs');
+                    return;
+                }
+                
+                const filteredSongs = songs.filter(song => 
+                    song.title.toLowerCase().includes(searchText) ||
+                    song.artist.toLowerCase().includes(searchText) ||
+                    song.album.toLowerCase().includes(searchText) ||
+                    song.genre.toLowerCase().includes(searchText)
+                );
+                
+                // 清空所有歌单并显示搜索结果
+                document.getElementById('hot-songs').innerHTML = '';
+                document.getElementById('new-songs').innerHTML = '';
+                renderSongs(filteredSongs, 'hot-songs');
+                
+                // 隐藏部分UI元素
+                document.querySelectorAll('.section-title').forEach(title => {
+                    if (title.textContent !== '热门歌曲') title.style.display = 'none';
+                });
+            };
+            
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+                
+                // 如果搜索框为空，恢复显示
+                if (searchInput.value.trim() === '') {
+                    document.querySelectorAll('.section-title').forEach(title => {
+                        title.style.display = 'block';
+                    });
+                    renderSongs(songs.filter(song => song.hot), 'hot-songs');
+                    renderSongs(songs.filter(song => !song.hot), 'new-songs');
+                }
+            });
+        }
+        
+        // 分类过滤
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // 为当前点击的按钮添加active类
+                    this.classList.add('active');
+                    
+                    const filter = this.textContent;
+                    if (filter === '全部') {
+                        renderSongs(songs.filter(song => song.hot), 'hot-songs');
+                        renderSongs(songs.filter(song => !song.hot), 'new-songs');
+                    } else {
+                        const filteredSongs = songs.filter(song => song.genre === filter);
+                        const hotFiltered = filteredSongs.filter(song => song.hot);
+                        const newFiltered = filteredSongs.filter(song => !song.hot);
+                        
+                        renderSongs(hotFiltered, 'hot-songs');
+                        renderSongs(newFiltered, 'new-songs');
+                    }
+                });
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 分别渲染热门歌曲和最新歌曲
+            renderSongs(songs.filter(song => song.hot), 'hot-songs');
+            renderSongs(songs.filter(song => !song.hot), 'new-songs');
+            renderArtists();
+            setupSearch();
+            setupFilters();
+        });
+    </script>
+</body>
+</html>
