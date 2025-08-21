@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电子歌单 - 更新背景和头像</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: url('https://qn-n4-lz02.obs.cn-north-4.myhuaweicloud.com/meiyan-common-img/photo/68a70f8684937x0ex97hm9252.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #000;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .tagline {
+            color: #000;
+            font-size: 1.3rem;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+        
+        .tagline .highlight {
+            color: #0066cc;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            color: #000;
+            font-size: 1rem;
+            outline: none;
+            font-weight: 500;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .search-box button {
+            padding: 15px 25px;
+            border: none;
+            background: rgba(0, 102, 204, 0.8);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: rgba(0, 85, 170, 0.9);
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 15px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #000;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(0, 102, 204, 0.8);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+        }
+        
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .song-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .song-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .song-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .song-item.copied {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.4);
+            transform: scale(1.02);
+        }
+        
+        .song-number {
+            width: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: rgba(0, 102, 204, 0.8);
+            text-align: center;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+        }
+        
+        .song-title {
+            width: 250px;
+            font-size: 1.1rem;
+            color: #000;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            padding: 0 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .song-artist {
+            width: 200px;
+            color: #0066cc;
+            font-weight: 500;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            padding: 0 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .song-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex: 1;
+            padding: 0 15px;
+            align-items: center;
+        }
+        
+        .song-tag {
+            padding: 5px 12px;
+            background: rgba(0, 102, 204, 0.15);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #0066cc;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 102, 204, 0.3);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .header-number {
+            width: 50px;
+            text-align: center;
+        }
+        
+        .header-title {
+            width: 250px;
+            padding: 0 15px;
+        }
+        
+        .header-artist {
+            width: 200px;
+            padding: 0 15px;
+        }
+        
+        .header-tags {
+            flex: 1;
+            padding: 0 15px;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 102, 204, 0.7);
+            color: #000;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            color: #000;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+            color: #0066cc;
+            margin-bottom: 5px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .copy-notification.show {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 992px) {
+            .song-title {
+                width: 200px;
+            }
+            
+            .song-artist {
+                width: 150px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .song-header {
+                display: none;
+            }
+            
+            .song-item {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .song-number, .song-title, .song-artist {
+                width: auto;
+                flex: 1;
+                padding: 0;
+                text-align: left;
+            }
+            
+            .song-tags {
+                width: 100%;
+                padding: 0;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .song-item {
+                padding: 12px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+                border-radius: 15px;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .search-box button {
+                width: 100%;
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .song-number, .song-title, .song-artist {
+                flex: none;
+                width: 100%;
+                text-align: left;
+                margin-bottom: 5px;
+            }
+            
+            .avatar {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="avatar">
+                <img src="https://qn-n4-lz02.obs.cn-north-4.myhuaweicloud.com/meiyan-common-img/photo/68a718a67e03eixcknie691952.jpg" alt="用户头像">
+            </div>
+            <h1>祈岁</h1>
+            <p class="tagline">共收录 <span class="highlight" id="header-song-count">0</span> 首优质歌曲</p>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索歌曲、歌手或标签...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <button class="filter-btn active">全部</button>
+            <button class="filter-btn">emo</button>
+            <button class="filter-btn">戏腔</button>
+            <button class="filter-btn">甜歌</button>
+            <button class="filter-btn">古风</button>
+            <button class="filter-btn">粤语</button>
+            <button class="filter-btn">流行</button>
+            <button class="filter-btn">摇滚</button>
+        </div>
+        
+        <h2 class="section-title">我的歌单</h2>
+        
+        <div class="song-header">
+            <div class="header-number">序号</div>
+            <div class="header-title">歌曲名称</div>
+            <div class="header-artist">歌手</div>
+            <div class="header-tags">分类标签</div>
+        </div>
+        
+        <div class="song-list" id="song-list">
+            <!-- 歌曲将通过JavaScript动态添加 -->
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="total-songs">0</div>
+                <div class="stat-label">歌曲总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="total-artists">0</div>
+                <div class="stat-label">歌手数量</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="total-tags">0</div>
+                <div class="stat-label">分类标签</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="copy-notification" id="copy-notification">
+        <i class="fas fa-check-circle"></i>
+        <span>已复制歌名到剪贴板</span>
+    </div>
+
+    <script>
+        // 示例歌曲数据
+        const songs = [
+            { id: 1, title: "处处吻", artist: "杨千嬅", tags: ["粤语", "emo"] },
+            { id: 2, title: "天外来物", artist: "薛之谦", tags: ["emo"] },
+            { id: 3, title: "人间不值得", artist: "黄诗扶", tags: ["戏腔", "古风"] },
+            { id: 4, title: "牵丝戏", artist: "银铃", tags: ["戏腔", "古风"] },
+            { id: 5, title: "爱你", artist: "王心凌", tags: ["甜歌"] },
+            { id: 6, title: "恋爱告急", artist: "鞠婧祎", tags: ["甜歌"] },
+            { id: 7, title: "起风了", artist: "买辣椒也用券", tags: ["流行"] },
+            { id: 8, title: "晴天", artist: "周杰伦", tags: ["流行"] },
+            { id: 9, title: "光年之外", artist: "G.E.M.邓紫棋", tags: ["流行"] },
+            { id: 10, title: "稻香", artist: "周杰伦", tags: ["励志"] },
+            { id: 11, title: "泡沫", artist: "G.E.M.邓紫棋", tags: ["流行"] },
+            { id: 12, title: "说散就散", artist: "JC陈泳彤", tags: ["emo"] }
+        ];
+
+        // 复制歌名功能
+        function copySongTitle(title) {
+            navigator.clipboard.writeText(title).then(() => {
+                // 显示复制成功通知
+                const notification = document.getElementById('copy-notification');
+                notification.classList.add('show');
+                
+                // 3秒后隐藏通知
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // 备用复制方法
+                const textArea = document.createElement('textarea');
+                textArea.value = title;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                // 显示复制成功通知
+                const notification = document.getElementById('copy-notification');
+                notification.classList.add('show');
+                
+                // 3秒后隐藏通知
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            });
+        }
+
+        // 渲染歌曲列表
+        function renderSongs(songsArray) {
+            const songList = document.getElementById('song-list');
+            songList.innerHTML = '';
+            
+            songsArray.forEach((song, index) => {
+                const songItem = document.createElement('div');
+                songItem.className = 'song-item';
+                songItem.setAttribute('data-title', song.title);
+                songItem.innerHTML = `
+                    <div class="song-number">${index + 1}</div>
+                    <div class="song-title">${song.title}</div>
+                    <div class="song-artist">${song.artist}</div>
+                    <div class="song-tags">
+                        ${song.tags.map(tag => `<span class="song-tag">${tag}</span>`).join('')}
+                    </div>
+                `;
+                
+                // 添加点击事件
+                songItem.addEventListener('click', function() {
+                    const title = this.getAttribute('data-title');
+                    copySongTitle(title);
+                    
+                    // 添加复制成功视觉效果
+                    this.classList.add('copied');
+                    
+                    // 2秒后移除视觉效果
+                    setTimeout(() => {
+                        this.classList.remove('copied');
+                    }, 2000);
+                });
+                
+                songList.appendChild(songItem);
+            });
+            
+            // 更新统计信息
+            updateStats(songsArray);
+        }
+        
+        // 更新统计信息
+        function updateStats(songsArray) {
+            const totalSongs = songsArray.length;
+            document.getElementById('total-songs').textContent = totalSongs;
+            document.getElementById('header-song-count').textContent = totalSongs;
+            
+            // 计算不重复的歌手数量
+            const artists = new Set(songsArray.map(song => song.artist));
+            document.getElementById('total-artists').textContent = artists.size;
+            
+            // 计算不重复的标签数量
+            const allTags = songsArray.flatMap(song => song.tags);
+            const uniqueTags = new Set(allTags);
+            document.getElementById('total-tags').textContent = uniqueTags.size;
+        }
+        
+        // 搜索功能
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            const performSearch = () => {
+                const searchText = searchInput.value.toLowerCase();
+                if (searchText.trim() === '') {
+                    renderSongs(songs);
+                    return;
+                }
+                
+                const filteredSongs = songs.filter(song => 
+                    song.title.toLowerCase().includes(searchText) ||
+                    song.artist.toLowerCase().includes(searchText) ||
+                    song.tags.some(tag => tag.toLowerCase().includes(searchText))
+                );
+                
+                renderSongs(filteredSongs);
+            };
+            
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+        
+        // 分类过滤
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // 为当前点击的按钮添加active类
+                    this.classList.add('active');
+                    
+                    const filter = this.textContent;
+                    if (filter === '全部') {
+                        renderSongs(songs);
+                    } else {
+                        const filteredSongs = songs.filter(song => 
+                            song.tags.includes(filter)
+                        );
+                        renderSongs(filteredSongs);
+                    }
+                });
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderSongs(songs);
+            setupSearch();
+            setupFilters();
+        });
+    </script>
+</body>
+</html>
