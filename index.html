@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>粉丝存歌系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: url('https://qn-n4-lz02.obs.cn-north-4.myhuaweicloud.com/meiyan-common-img/photo/68a70f8684937x0ex97hm9252.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #000;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .admin-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 8px 16px;
+            background: rgba(0, 102, 204, 0.8);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .admin-btn:hover {
+            background: rgba(0, 85, 170, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .sync-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .sync-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #27ae60;
+            animation: pulse 2s infinite;
+        }
+        
+        .sync-indicator.syncing {
+            background-color: #f39c12;
+        }
+        
+        .sync-indicator.error {
+            background-color: #e74c3c;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: #000;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .tagline {
+            color: #000;
+            font-size: 1.1rem;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+        
+        .tagline .highlight {
+            color: #0066cc;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            display: flex;
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            background: transparent;
+            color: #000;
+            font-size: 14px;
+            outline: none;
+            font-weight: 500;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+        }
+        
+        .search-box button {
+            padding: 12px 20px;
+            border: none;
+            background: rgba(0, 102, 204, 0.8);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+        
+        .search-box button:hover {
+            background: rgba(0, 85, 170, 0.9);
+        }
+        
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .song-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+            min-width: 500px;
+        }
+        
+        .song-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 12px 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            min-width: 500px;
+        }
+        
+        .song-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .song-number {
+            width: 40px;
+            font-size: 14px;
+            font-weight: bold;
+            color: rgba(0, 102, 204, 0.8);
+            text-align: center;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            flex-shrink: 0;
+        }
+        
+        .song-title {
+            width: 180px;
+            font-size: 14px;
+            color: #000;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            padding: 0 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+        
+        .song-artist {
+            width: 120px;
+            color: #0066cc;
+            font-weight: 500;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+            padding: 0 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .header-number {
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .header-title {
+            width: 180px;
+            padding: 0 12px;
+            flex-shrink: 0;
+        }
+        
+        .header-artist {
+            width: 120px;
+            padding: 0 12px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin: 30px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(0, 102, 204, 0.7);
+            color: #000;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            padding: 15px;
+        }
+        
+        /* 删除确认框显示在最前方 */
+        #delete-modal {
+            z-index: 2000;
+        }
+        
+        /* 添加存歌框显示在最前方 */
+        #add-modal {
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        /* 关闭按钮 */
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #ff4757;
+            background: #f5f5f5;
+            transform: rotate(90deg);
+        }
+        
+        .modal h2 {
+            margin-bottom: 15px;
+            color: #0066cc;
+            text-align: center;
+            font-size: 1.3rem;
+            padding-right: 30px;
+        }
+        
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .modal-btn.primary {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .modal-btn.secondary {
+            background: #ccc;
+            color: #333;
+        }
+        
+        .modal-btn.danger {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .modal-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* 管理界面样式 */
+        .admin-song-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .admin-song-item input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 80px;
+        }
+        
+        .admin-song-item input[type="number"] {
+            text-align: center;
+            min-width: 60px;
+        }
+        
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .save-item-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .add-song-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        /* 添加存歌表单样式 */
+        .add-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        /* 管理模态框特殊样式 */
+        #admin-modal .modal-content {
+            max-width: 800px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0066cc;
+            flex-shrink: 0;
+        }
+        
+        .admin-title {
+            color: #0066cc;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .admin-content {
+            flex: 1;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding-right: 5px;
+        }
+        
+        .admin-footer {
+            flex-shrink: 0;
+            margin-top: 15px;
+        }
+        
+        /* 自定义滚动条 */
+        .admin-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .admin-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .admin-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        .admin-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* 响应式调整 - 手机端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .admin-btn {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                margin: 0;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .sync-status {
+                top: 10px;
+                right: 10px;
+                font-size: 11px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-top: 10px;
+                margin-bottom: 5px;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+                margin: 20px 0 12px;
+            }
+            
+            .song-header,
+            .song-item {
+                min-width: 100%;
+                font-size: 12px;
+            }
+            
+            .song-number {
+                width: 35px;
+                font-size: 12px;
+            }
+            
+            .song-title {
+                width: 150px;
+                font-size: 12px;
+                padding: 0 8px;
+            }
+            
+            .song-artist {
+                width: 100px;
+                font-size: 12px;
+                padding: 0 8px;
+            }
+            
+            .header-number {
+                width: 35px;
+            }
+            
+            .header-title {
+                width: 150px;
+                padding: 0 8px;
+            }
+            
+            .header-artist {
+                width: 100px;
+                padding: 0 8px;
+            }
+            
+            /* 手机端管理项优化 */
+            .admin-song-item {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 10px;
+                gap: 6px;
+            }
+            
+            .admin-song-item span {
+                min-width: 25px;
+                font-size: 12px;
+            }
+            
+            .admin-song-item input {
+                min-width: 70px;
+                padding: 6px;
+                font-size: 12px;
+                flex-shrink: 1;
+            }
+            
+            .admin-song-item input.admin-song-title {
+                min-width: 90px;
+            }
+            
+            .admin-song-item input.admin-song-artist {
+                min-width: 50px;
+                max-width: 60px;
+            }
+            
+            .save-item-btn,
+            .delete-btn {
+                padding: 6px 8px;
+                font-size: 11px;
+                min-width: 45px;
+                flex-shrink: 0;
+            }
+            
+            .close-btn {
+                top: 10px;
+                right: 10px;
+                font-size: 1.3rem;
+                width: 25px;
+                height: 25px;
+            }
+            
+            .modal h2 {
+                padding-right: 25px;
+                font-size: 1.2rem;
+            }
+            
+            /* 管理模态框响应式 */
+            #admin-modal .modal-content {
+                max-width: 95%;
+                padding: 15px;
+            }
+            
+            .admin-title {
+                font-size: 1.3rem;
+            }
+            
+            .add-form {
+                gap: 10px;
+            }
+            
+            .form-group input {
+                padding: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .song-number {
+                width: 30px;
+            }
+            
+            .song-title {
+                width: 130px;
+            }
+            
+            .song-artist {
+                width: 80px;
+            }
+            
+            .header-number {
+                width: 30px;
+            }
+            
+            .header-title {
+                width: 130px;
+            }
+            
+            .header-artist {
+                width: 80px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+                max-width: 300px;
+            }
+            
+            .modal h2 {
+                font-size: 1.1rem;
+            }
+            
+            /* 进一步优化小屏幕手机 */
+            .admin-song-item {
+                gap: 4px;
+                padding: 8px;
+            }
+            
+            .admin-song-item input.admin-song-title {
+                min-width: 80px;
+                font-size: 11px;
+            }
+            
+            .admin-song-item input.admin-song-artist {
+                min-width: 45px;
+                max-width: 50px;
+                font-size: 11px;
+            }
+            
+            .save-item-btn,
+            .delete-btn {
+                padding: 5px 6px;
+                font-size: 10px;
+                min-width: 40px;
+            }
+        }
+        
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            .admin-song-item {
+                gap: 3px;
+            }
+            
+            .admin-song-item input.admin-song-title {
+                min-width: 70px;
+                font-size: 10px;
+            }
+            
+            .admin-song-item input.admin-song-artist {
+                min-width: 40px;
+                font-size: 10px;
+            }
+            
+            .save-item-btn,
+            .delete-btn {
+                padding: 4px 5px;
+                font-size: 9px;
+                min-width: 35px;
+            }
+            
+            .admin-song-item span {
+                min-width: 20px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>祈岁</h1>
+            <p class="tagline">共 <span class="highlight" id="header-song-count">0</span> 首粉丝存歌</p>
+            <button class="admin-btn" id="admin-btn">管理存歌</button>
+            <div class="sync-status" id="sync-status">
+                <div class="sync-indicator" id="sync-indicator"></div>
+                <span id="sync-text">已同步</span>
+            </div>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索粉丝名称或数量...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        
+        <h2 class="section-title">粉丝的存歌</h2>
+        
+        <div class="song-header">
+            <div class="header-number">序号</div>
+            <div class="header-title">粉丝ID</div>
+            <div class="header-artist">数量</div>
+        </div>
+        
+        <div class="song-list" id="song-list">
+            <!-- 歌曲将通过JavaScript动态添加 -->
+        </div>
+    </div>
+
+    <!-- 密码验证模态框 -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="password-close-btn">&times;</button>
+            <h2>请输入管理密码</h2>
+            <input type="password" id="password-input" placeholder="输入密码...">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="cancel-btn">取消</button>
+                <button class="modal-btn primary" id="login-btn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 - 显示在最前方 -->
+    <div class="modal" id="delete-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="delete-close-btn">&times;</button>
+            <h2>确认删除</h2>
+            <p>确定要删除这条存歌记录吗？此操作不可撤销。</p>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="delete-cancel-btn">取消</button>
+                <button class="modal-btn danger" id="delete-confirm-btn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加存歌模态框 - 显示在最前方 -->
+    <div class="modal" id="add-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="add-close-btn">&times;</button>
+            <h2>添加存歌</h2>
+            <form class="add-form" id="add-form">
+                <div class="form-group">
+                    <label for="new-fan-id">粉丝ID：</label>
+                    <input type="text" id="new-fan-id" placeholder="请输入粉丝ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-song-count">存歌数量：</label>
+                    <input type="number" id="new-song-count" placeholder="请输入数量" min="1" max="999" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn secondary" id="add-cancel-btn">取消</button>
+                    <button type="submit" class="modal-btn primary">确认添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理界面模态框 -->
+    <div class="modal" id="admin-modal">
+        <div class="modal-content">
+            <button class="close-btn" id="admin-close-btn">&times;</button>
+            <div class="admin-header">
+                <h2 class="admin-title">存歌管理</h2>
+            </div>
+            <div class="admin-content" id="admin-song-list">
+                <!-- 管理模式的歌曲列表将通过JavaScript动态添加 -->
+            </div>
+            <div class="admin-footer">
+                <button class="add-song-btn" id="add-song-btn">添加存歌</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Sheets配置
+        const GOOGLE_SHEET_ID = '1j2MEI1RUE_JV1Ht-msYJgtcZ09gNtOIYV94gf4PXkVY'; // 替换为你的Google Sheet ID
+        const GOOGLE_SHEET_NAME = 'Songs'; // 工作表名称
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx3wDsivRDZLdKtlUM7gnHEGuGPRK6ZFa-ecYABKMQivLbhSF3sMmszicfJ9KkG3g7N/exec'; // 替换为你的Google Apps Script部署URL
+
+        // 密码设置
+        const ADMIN_PASSWORD = "123456";
+        const SESSION_TIMEOUT = 5 * 60 * 1000; // 5分钟
+
+        // 同步状态
+        let isSyncing = false;
+        let lastSyncTime = null;
+        let syncInterval = null;
+
+        // 初始化歌曲数据
+        let songs = [];
+
+        // 更新同步状态显示
+        function updateSyncStatus(status, text) {
+            const indicator = document.getElementById('sync-indicator');
+            const textElement = document.getElementById('sync-text');
+            
+            indicator.className = 'sync-indicator';
+            if (status === 'syncing') {
+                indicator.classList.add('syncing');
+                textElement.textContent = '同步中...';
+            } else if (status === 'error') {
+                indicator.classList.add('error');
+                textElement.textContent = text || '同步失败';
+            } else {
+                textElement.textContent = text || '已同步';
+            }
+        }
+
+        // 从Google Sheets获取数据
+        async function fetchSongsFromGoogleSheets() {
+            try {
+                updateSyncStatus('syncing');
+                
+                const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?action=get&sheetName=${GOOGLE_SHEET_NAME}`);
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    songs = data.data.map((row, index) => ({
+                        id: index + 1,
+                        title: row[0] || '',
+                        artist: parseInt(row[1]) || 0
+                    })).filter(song => song.title && song.artist > 0);
+                    
+                    updateSyncStatus('success');
+                    lastSyncTime = new Date();
+                    return true;
+                } else {
+                    throw new Error(data.error || '获取数据失败');
+                }
+            } catch (error) {
+                console.error('从Google Sheets获取数据失败:', error);
+                updateSyncStatus('error', error.message);
+                // 如果网络失败，尝试从localStorage加载
+                const localSongs = loadSongsFromLocal();
+                if (localSongs.length > 0) {
+                    songs = localSongs;
+                    updateSyncStatus('success', '本地数据');
+                }
+                return false;
+            }
+        }
+
+        // 保存数据到Google Sheets
+        async function saveSongsToGoogleSheets() {
+            try {
+                updateSyncStatus('syncing');
+                
+                const dataToSave = songs.map(song => [song.title, song.artist.toString()]);
+                
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update',
+                        sheetName: GOOGLE_SHEET_NAME,
+                        data: dataToSave
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    // 同时保存到localStorage作为备份
+                    saveSongsToLocal(songs);
+                    updateSyncStatus('success');
+                    lastSyncTime = new Date();
+                    return true;
+                } else {
+                    throw new Error(result.error || '保存数据失败');
+                }
+            } catch (error) {
+                console.error('保存到Google Sheets失败:', error);
+                updateSyncStatus('error', error.message);
+                // 保存到localStorage作为备份
+                saveSongsToLocal(songs);
+                return false;
+            }
+        }
+
+        // 从localStorage加载数据
+        function loadSongsFromLocal() {
+            const savedSongs = localStorage.getItem('fanSongs');
+            return savedSongs ? JSON.parse(savedSongs) : [];
+        }
+
+        // 保存数据到localStorage
+        function saveSongsToLocal(songsData) {
+            localStorage.setItem('fanSongs', JSON.stringify(songsData));
+        }
+
+        // 检查会话是否有效
+        function isSessionValid() {
+            const loginTime = localStorage.getItem('adminLoginTime');
+            if (!loginTime) return false;
+            
+            const currentTime = new Date().getTime();
+            return (currentTime - parseInt(loginTime)) < SESSION_TIMEOUT;
+        }
+
+        // 设置登录时间
+        function setLoginTime() {
+            localStorage.setItem('adminLoginTime', new Date().getTime().toString());
+        }
+
+        // 计算存歌总数
+        function calculateTotalSongs() {
+            return songs.reduce((total, song) => total + song.artist, 0);
+        }
+
+        // 渲染歌曲列表
+        function renderSongs(songsArray) {
+            const songList = document.getElementById('song-list');
+            songList.innerHTML = '';
+            
+            songsArray.forEach((song, index) => {
+                const songItem = document.createElement('div');
+                songItem.className = 'song-item';
+                songItem.innerHTML = `
+                    <div class="song-number">${index + 1}</div>
+                    <div class="song-title">${song.title}</div>
+                    <div class="song-artist">${song.artist}</div>
+                `;
+                
+                songList.appendChild(songItem);
+            });
+            
+            // 更新标题中的存歌总数（所有数量的合计）
+            const totalSongs = calculateTotalSongs();
+            document.getElementById('header-song-count').textContent = totalSongs;
+        }
+        
+        // 搜索功能
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            
+            const performSearch = () => {
+                const searchText = searchInput.value.toLowerCase();
+                if (searchText.trim() === '') {
+                    renderSongs(songs);
+                    return;
+                }
+                
+                const filteredSongs = songs.filter(song => 
+                    song.title.toLowerCase().includes(searchText) ||
+                    song.artist.toString().includes(searchText)
+                );
+                
+                renderSongs(filteredSongs);
+            };
+            
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+
+        // 管理功能
+        function setupAdmin() {
+            const adminBtn = document.getElementById('admin-btn');
+            const passwordModal = document.getElementById('password-modal');
+            const adminModal = document.getElementById('admin-modal');
+            const deleteModal = document.getElementById('delete-modal');
+            const addModal = document.getElementById('add-modal');
+            const passwordInput = document.getElementById('password-input');
+            const loginBtn = document.getElementById('login-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+            const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+            const addSongBtn = document.getElementById('add-song-btn');
+            const addCancelBtn = document.getElementById('add-cancel-btn');
+            const addForm = document.getElementById('add-form');
+            const passwordCloseBtn = document.getElementById('password-close-btn');
+            const adminCloseBtn = document.getElementById('admin-close-btn');
+            const deleteCloseBtn = document.getElementById('delete-close-btn');
+            const addCloseBtn = document.getElementById('add-close-btn');
+            
+            // 关闭所有模态框
+            const closeAllModals = () => {
+                passwordModal.style.display = 'none';
+                adminModal.style.display = 'none';
+                deleteModal.style.display = 'none';
+                addModal.style.display = 'none';
+                currentDeleteId = null;
+            };
+            
+            // 关闭按钮事件
+            passwordCloseBtn.addEventListener('click', closeAllModals);
+            adminCloseBtn.addEventListener('click', closeAllModals);
+            deleteCloseBtn.addEventListener('click', () => {
+                deleteModal.style.display = 'none';
+                currentDeleteId = null;
+            });
+            addCloseBtn.addEventListener('click', () => {
+                addModal.style.display = 'none';
+            });
+            
+            // 打开管理界面
+            const openAdminModal = () => {
+                adminModal.style.display = 'flex';
+                renderAdminSongs();
+            };
+            
+            // 打开密码验证模态框
+            adminBtn.addEventListener('click', () => {
+                if (isSessionValid()) {
+                    openAdminModal();
+                } else {
+                    passwordModal.style.display = 'flex';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            });
+            
+            // 取消按钮
+            cancelBtn.addEventListener('click', closeAllModals);
+            addCancelBtn.addEventListener('click', () => {
+                addModal.style.display = 'none';
+            });
+            
+            // 登录按钮
+            loginBtn.addEventListener('click', () => {
+                if (passwordInput.value === ADMIN_PASSWORD) {
+                    setLoginTime();
+                    closeAllModals();
+                    openAdminModal();
+                } else {
+                    alert('密码错误！');
+                    passwordInput.value = '';
+                }
+            });
+            
+            // 删除取消按钮
+            deleteCancelBtn.addEventListener('click', () => {
+                deleteModal.style.display = 'none';
+                currentDeleteId = null;
+            });
+            
+            // 删除确认按钮 - 只关闭删除确认框，保持管理界面打开
+            deleteConfirmBtn.addEventListener('click', async () => {
+                if (currentDeleteId) {
+                    songs = songs.filter(song => song.id !== currentDeleteId);
+                    const success = await saveSongsToGoogleSheets();
+                    if (success) {
+                        renderAdminSongs();
+                        renderSongs(songs);
+                        deleteModal.style.display = 'none';
+                        currentDeleteId = null;
+                        alert('删除成功！');
+                    } else {
+                        alert('删除失败，请检查网络连接');
+                    }
+                }
+            });
+            
+            // 添加存歌按钮
+            addSongBtn.addEventListener('click', () => {
+                addModal.style.display = 'flex';
+                document.getElementById('new-fan-id').value = '';
+                document.getElementById('new-song-count').value = '';
+                document.getElementById('new-fan-id').focus();
+            });
+            
+            // 添加表单提交 - 只关闭添加框，保持管理界面打开
+            addForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const fanId = document.getElementById('new-fan-id').value.trim();
+                const songCount = parseInt(document.getElementById('new-song-count').value.trim());
+                
+                if (!fanId) {
+                    alert('请输入粉丝ID！');
+                    return;
+                }
+                
+                if (isNaN(songCount) || songCount < 1 || songCount > 999) {
+                    alert('请输入有效的数量（1-999）！');
+                    return;
+                }
+                
+                // 检查是否已存在相同的粉丝ID
+                if (songs.some(song => song.title === fanId)) {
+                    alert('该粉丝ID已存在！');
+                    return;
+                }
+                
+                const newId = songs.length > 0 ? Math.max(...songs.map(s => s.id)) + 1 : 1;
+                const newSong = {
+                    id: newId,
+                    title: fanId,
+                    artist: songCount
+                };
+                
+                songs.push(newSong);
+                const success = await saveSongsToGoogleSheets();
+                if (success) {
+                    renderAdminSongs();
+                    renderSongs(songs);
+                    addModal.style.display = 'none';
+                    alert('添加成功！');
+                } else {
+                    alert('添加失败，请检查网络连接');
+                }
+            });
+            
+            // 渲染管理模式的歌曲列表
+            function renderAdminSongs() {
+                const adminSongList = document.getElementById('admin-song-list');
+                adminSongList.innerHTML = '';
+                
+                songs.forEach((song, index) => {
+                    const songItem = document.createElement('div');
+                    songItem.className = 'admin-song-item';
+                    songItem.innerHTML = `
+                        <span>${index + 1}.</span>
+                        <input type="text" class="admin-song-title" value="${song.title}" data-id="${song.id}" placeholder="粉丝ID">
+                        <input type="number" class="admin-song-artist" value="${song.artist}" data-id="${song.id}" placeholder="数量" min="1" max="999">
+                        <button class="save-item-btn" data-id="${song.id}">保存</button>
+                        <button class="delete-btn" data-id="${song.id}">删除</button>
+                    `;
+                    adminSongList.appendChild(songItem);
+                });
+                
+                // 添加保存按钮事件
+                document.querySelectorAll('.save-item-btn').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        const titleInput = document.querySelector(`.admin-song-title[data-id="${id}"]`);
+                        const artistInput = document.querySelector(`.admin-song-artist[data-id="${id}"]`);
+                        
+                        const title = titleInput.value.trim();
+                        const artist = parseInt(artistInput.value.trim());
+                        
+                        if (!title) {
+                            alert('粉丝ID不能为空！');
+                            return;
+                        }
+                        
+                        if (isNaN(artist) || artist < 1 || artist > 999) {
+                            alert('请输入有效的数量（1-999）！');
+                            return;
+                        }
+                        
+                        // 检查是否已存在相同的粉丝ID（排除当前编辑的项）
+                        if (songs.some(song => song.title === title && song.id !== id)) {
+                            alert('该粉丝ID已存在！');
+                            return;
+                        }
+                        
+                        const song = songs.find(s => s.id === id);
+                        if (song) {
+                            song.title = title;
+                            song.artist = artist;
+                            const success = await saveSongsToGoogleSheets();
+                            if (success) {
+                                renderSongs(songs);
+                                alert('保存成功！');
+                            } else {
+                                alert('保存失败，请检查网络连接');
+                            }
+                        }
+                    });
+                });
+                
+                // 添加删除按钮事件
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        currentDeleteId = id;
+                        deleteModal.style.display = 'flex';
+                    });
+                });
+            }
+            
+            // 按ESC键关闭模态框
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    if (deleteModal.style.display === 'flex') {
+                        deleteModal.style.display = 'none';
+                        currentDeleteId = null;
+                    } else if (addModal.style.display === 'flex') {
+                        addModal.style.display = 'none';
+                    } else if (passwordModal.style.display === 'flex') {
+                        passwordModal.style.display = 'none';
+                    } else if (adminModal.style.display === 'flex') {
+                        adminModal.style.display = 'none';
+                    }
+                }
+            });
+            
+            // 限制数量输入框只能输入数字
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('admin-song-artist') || e.target.id === 'new-song-count') {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    if (e.target.value > 999) e.target.value = 999;
+                    if (e.target.value < 1) e.target.value = 1;
+                }
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 首先尝试从Google Sheets加载数据
+            const success = await fetchSongsFromGoogleSheets();
+            if (success) {
+                renderSongs(songs);
+            } else {
+                // 如果网络失败，使用本地数据
+                songs = loadSongsFromLocal();
+                renderSongs(songs);
+            }
+            
+            setupSearch();
+            setupAdmin();
+            
+            // 设置定时同步（每30秒同步一次）
+            syncInterval = setInterval(async () => {
+                await fetchSongsFromGoogleSheets();
+                renderSongs(songs);
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
